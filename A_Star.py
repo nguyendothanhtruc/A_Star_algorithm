@@ -5,7 +5,6 @@ import numpy as np
 class Node:
     x : int= None
     y : int= None
-    visited : bool = None
     gn : float = None
     fn : float = None
     hn : int = None
@@ -94,7 +93,7 @@ def checkHeight(A:Node, B:Node, m: int):
     return False
 
 def H1_Manhattan(A:Node, B:Node, map):
-    return abs(A.x-B.x)+abs(A.y-B.y) + abs(map[A.y][A.x] - map[B.x][B.y])
+    return abs(A.x-B.x)+abs(A.y-B.y) + abs(map[A.y][A.x] - map[B.y][B.x])#d(A,B,map)#
 
 def H2_Euclid(A:Node, B:Node):
     return np.sqrt(np.square(A.x-B.x)+np.square(A.y-B.y))
@@ -105,6 +104,9 @@ def isIn(list, G:Node):
             return True,item
 
     return False,G
+def isHere(list,G:Node):
+    if list[G.y][G.x]>0:
+        return True, G
 
 def generateSuccessor(currentNode:Node):
     #Current_node coordinates
@@ -170,7 +172,8 @@ def generateSuccessor(currentNode:Node):
 
 def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
     queue:list = [] #open list
-    closed_list : list = []
+    row,col=map.shape
+    closed_list=np.zeros((row,col))
 
     #Put S to open_list
     queue.append(S)
@@ -180,6 +183,7 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
     currentNode:Node
 
     #While open_list is not empty
+    dup=closed_list
     while (queue):
         currentNode = queue[0]
 
@@ -196,19 +200,20 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
 
             check,node = isIn(queue,node)
             if check:
-                if node.gn <= successor_cost: 
-                    continue
+                if node.gn <= successor_cost: continue
 
             else: 
-                check,node = isIn(closed_list,node)
+                #check,node = isIn(closed_list,node)
+                check=isHere(closed_list,node)
                 if check:
                     if node.gn <= successor_cost: 
                         continue
 
                     queue.append(node)
 
-                    closed_list(node)
-
+                   # closed_list.remove(node)
+                    closed_list[node.y][node.x]=0
+ 
 
                 else:
                 	node.hn = heuristic(node,G,map) #heuristic 
@@ -220,9 +225,8 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
             node.parent = currentNode
                
         #Add current_node to closed list
-        closed_list.append(currentNode)
-
-        
+        #closed_list.append(currentNode)
+        closed_list[currentNode.y][currentNode.x]=currentNode.gn
 
         #Remove current node from open_list
         queue.remove(currentNode)
@@ -230,15 +234,13 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
 
         #Sort queue according to f(n) value
         queue.sort(key = lambda Node: Node.fn)
-
+        #test
+        dup=closed_list
 
 
     #If the last node is not goal -->No solution or error
     if currentNode != G: print ("Can not find solution")
-                
-                
-
-
+    print(dup)
 
 #MAIN:
 
