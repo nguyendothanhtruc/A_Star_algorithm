@@ -8,16 +8,23 @@ class Node:
     visited : bool = None
     gn : float = None
     fn : float = None
-    hn : float = None
+    hn : int = None
     parent = None
 
     def __init__(self,x,y):
         self.x = x
         self.y = y
+
         self.visited = 0
+        
         self.fn = 0
         self.gn = 0
         self.hn = 0
+
+    def isEqual(self,G):
+        if self.x == G.x and self.y == G.y:
+            return True
+        return False
 
 
 
@@ -29,33 +36,27 @@ def convertToMatrix(filepath:str):
     bitmap.close()
     return map
 
-    """"
-    #[layer][row][column] <=> x,y,z
-    bitmap = np.array(img)
-    width,height = img.size
-    
-    map = np.empty((height,width), dtype='int')
-    
-    #Convert into 2D array 
-    for i in range(height):
-        for j in range(width):
-            map[i][j] = bitmap[i][j][0]
-    return map
-    """
-
-def colorBMP(fileInput:str,fileOutput:str):
+def colorBMP(fileInput:str,fileOutput:str, S:Node, G:Node):
     img = Image.open(fileInput)
 
-    width,height = img.size
-
     color = (255,0,0)
-
-    for x in range(height):
-        for y in range(width):
-            if x == y:
-                img.putpixel((x,y), color)
     
+    while not G.isEqual(S):
+        img.putpixel((G.x,G.y),color)
+        G = G.parent
+    img.putpixel((G.x,G.y),color)
+
     img.save(fileOutput)
+
+def writePath(fileInput:str,fileOutput:str, S:Node, G:Node):
+    output = open('out.txt','w')
+
+    output.write(str(G.gn))
+
+    output.close()
+
+    colorBMP(fileInput,fileOutput,S,G)
+
 
 def readInput(filepath:str):
     input = open(filepath,'r',encoding = 'utf-8')
@@ -75,6 +76,8 @@ def readInput(filepath:str):
     Line = input.readline()
     m = int(Line)
 
+    input.close()
+
     return S,G,m
 
 def d(A:Node,B:Node,map):
@@ -89,125 +92,160 @@ def checkHeight(A:Node, B:Node, m: int):
     if abs(deltaA) <= m:
         return True
     return False
-def H1_Mahattan(A:Node, B:Node):
-    return abs(A.x-B.x)+abs(A.y-B.y)
+
+def H1_Manhattan(A:Node, B:Node, map):
+    return abs(A.x-B.x)+abs(A.y-B.y) + abs(map[A.y][A.x] - map[B.x][B.y])
+
 def H2_Euclid(A:Node, B:Node):
     return np.sqrt(np.square(A.x-B.x)+np.square(A.y-B.y))
 
-def A_Star(map:np.array,S:Node,G:Node, m:int):
+def isIn(list, G:Node):
+    for item in list:
+        if item.x == G.x and item.y == G.y:
+            return True,item
+
+    return False,G
+
+def generateSuccessor(currentNode:Node):
+    #Current_node coordinates
+    x = currentNode.x
+    y = currentNode.y
+
+    row, column = map.shape 
+
+    successor = []
+    #Generates successors
+    if y-1 > 0: #If not top border
+        A = Node(x, y-1)
+        if (checkHeight(currentNode,A,m)):
+            successor.append(A)
+
+        if x + 1 < column: #If not right border
+            A = Node(x+1,y-1)
+            if (checkHeight(currentNode,A,m)):
+                successor.append(A)
+
+            A = Node(x+1,y)
+            if (checkHeight(currentNode,A,m)):
+                successor.append(A)
+
+        if x - 1 > 0: #If not left border
+            A = Node(x-1,y-1)
+            if (checkHeight(currentNode,A,m)):
+                successor.append(A)
+
+            A = Node(x-1,y)
+            if (checkHeight(currentNode,A,m)):
+                successor.append(A)   
+
+    #If not bottom border
+    if y + 1 < row: 
+        A = Node(x,y+1)
+        if (checkHeight(currentNode,A,m)):
+            successor.append(A)
+
+        if x + 1 < column:  #If not right border
+            A = Node(x+1,y+1)
+            if (checkHeight(currentNode,A,m)):
+                successor.append(A)
+
+        if x - 1 > 0:   #If not left border
+            A = Node(x-1,y+1)
+            if (checkHeight(currentNode,A,m)):
+                successor.append(A)
+        
+    #If not right border
+    if x + 1 < column: 
+        A = Node(x+1,y)
+        if (checkHeight(currentNode,A,m)):
+                successor.append(A)
+
+    #If not left border
+        if x - 1 > 0: 
+            A = Node(x-1,y)
+            if (checkHeight(currentNode,A,m)):
+                successor.append(A)  
+
+    return successor   
+
+def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
     queue:list = [] #open list
     closed_list : list = []
 
     #Put S to open_list
     queue.append(S)
-    S.fn = d(S,G,map) #heuristic
-    
+    S.fn = heuristic(S,G,map)
+
+
     currentNode:Node
-    row, column = map.shape
 
     #While open_list is not empty
     while (queue):
         currentNode = queue[0]
-        #f(n)=g(n)+h(n)
-        currentNode.fn = currentNode.gn + currentNode.hn
 
-        #Reach goal
-        if currentNode == G: return "ok"
+        #Reach goal -> draw path
+        if currentNode.isEqual(G): 
+            return writePath(fileInput, fileOutput, S,currentNode)
 
-        #Current_node coordinates
-        x = currentNode.x
-        y = currentNode.y
+        successor = generateSuccessor(currentNode)
 
-        successor = []
-
-        #Generates successors
-        if y-1 > 0: #If not top border
-            A = Node(x,y-1)
-            if (checkHeight(currentNode,A,m)):
-                successor.append(A)
-
-            if x + 1 < column: #If not right border
-                A = Node(x+1,y-1)
-                if (checkHeight(currentNode,A,m)):
-                    successor.append(A)
-
-                A = Node(x+1,y)
-                if (checkHeight(currentNode,A,m)):
-                    successor.append(A)
-
-            if x - 1 > 0: #If not left border
-                A = Node(x-1,y-1)
-                if (checkHeight(currentNode,A,m)):
-                    successor.append(A)
-
-                A = Node(x-1,y)
-                if (checkHeight(currentNode,A,m)):
-                    successor.append(A)   
-
-        #If not bottom border
-        if y + 1 < row: 
-            A = Node(x,y+1)
-            if (checkHeight(currentNode,A,m)):
-                successor.append(A)
-
-            if x + 1 < column:  #If not right border
-                A = Node(x+1,y+1)
-                if (checkHeight(currentNode,A,m)):
-                    successor.append(A)
-
-            if x - 1 > 0:   #If not left border
-                A = Node(x-1,y+1)
-                if (checkHeight(currentNode,A,m)):
-                    successor.append(A)
-        
         #For each node in successros[]
         for node in successor:
             #Calculate successors.f(n)
             successor_cost = currentNode.gn + d(currentNode,node,map)
-            if node in queue:
-                if node.gn <= successor_cost: break
-            elif node in closed_list:
-                if node.gn <= successor_cost: break
 
-                node.gn = successor_cost
-                node.parent = currentNode
+            check,node = isIn(queue,node)
+            if check:
+                if node.gn <= successor_cost: continue
 
-                queue.append(node)
-            else:
-                node.gn = successor_cost
-                node.hn = d(node,G,map) #heuristic 
-                node.parent = currentNode
+            else: 
+                check,node = isIn(closed_list,node)
+                if check:
+                    if node.gn <= successor_cost: 
+                        continue
 
-                queue.append(node)
+                    queue.append(node)
+
+                    closed_list.remove(node)
+
+
+                else:
+                	node.hn = heuristic(node,G,map) #heuristic 
+
+                	queue.append(node)
+
+            node.gn = successor_cost
+            node.fn = node.gn + node.hn
+            node.parent = currentNode
                
         #Add current_node to closed list
         closed_list.append(currentNode)
 
         #Remove current node from open_list
         queue.remove(currentNode)
-        #Cái gì đây
-        queue.sort(key = lambda Node: Node.gn)
+
+
+        #Sort queue according to f(n) value
+        queue.sort(key = lambda Node: Node.fn)
+
 
     #If the last node is not goal -->No solution or error
-    if currentNode != G: return "Error"
+    if currentNode != G: print ("Can not find solution")
                 
                 
-
-        
-        
 
 
 
 #MAIN:
 
-map = convertToMatrix('t.bmp')
+map = convertToMatrix('map.bmp')
 print(map)
-#S,G,m = readInput('in.txt')
-A = Node(0,0)
-B = Node(2,3)
-m = 200
-print(H1_Mahattan(A,B))
-A_Star(map,A,B,m)
+
+
+S,G,m = readInput('input.txt')
+
+
+A_Star(map,S,G,m,H1_Manhattan,'map.bmp', 'out.bmp')
 
 
 #colorBMP('map.bmp','new.bmp')
