@@ -196,7 +196,8 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
 
             check,node = isIn(queue,node)
             if check:
-                if node.gn <= successor_cost: continue
+                if node.gn <= successor_cost: 
+                    continue
 
             else: 
                 check,node = isIn(closed_list,node)
@@ -206,7 +207,7 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
 
                     queue.append(node)
 
-                    closed_list.remove(node)
+                    node.visited = 0
 
 
                 else:
@@ -219,7 +220,10 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
             node.parent = currentNode
                
         #Add current_node to closed list
-        closed_list.append(currentNode)
+        #closed_list.append(currentNode)
+
+        currentNode.visited = 1
+        
 
         #Remove current node from open_list
         queue.remove(currentNode)
@@ -227,6 +231,7 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
 
         #Sort queue according to f(n) value
         queue.sort(key = lambda Node: Node.fn)
+
 
 
     #If the last node is not goal -->No solution or error
