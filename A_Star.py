@@ -89,35 +89,44 @@ def checkHeight(A:Node, B:Node, m: int):
     if abs(deltaA) <= m:
         return True
     return False
+def H1_Mahattan(A:Node, B:Node):
+    return abs(A.x-B.x)+abs(A.y-B.y)
+def H2_Euclid(A:Node, B:Node):
+    return np.sqrt(np.square(A.x-B.x)+np.square(A.y-B.y))
 
 def A_Star(map:np.array,S:Node,G:Node, m:int):
-    queue:list = []
+    queue:list = [] #open list
     closed_list : list = []
 
+    #Put S to open_list
     queue.append(S)
-    S.fn = d(S,G,map) #hẻuistic
+    S.fn = d(S,G,map) #heuristic
     
     currentNode:Node
     row, column = map.shape
 
+    #While open_list is not empty
     while (queue):
         currentNode = queue[0]
-        
+        #f(n)=g(n)+h(n)
         currentNode.fn = currentNode.gn + currentNode.hn
 
-        if currentNode == G: return 'ok'
+        #Reach goal
+        if currentNode == G: return "ok"
 
+        #Current_node coordinates
         x = currentNode.x
         y = currentNode.y
 
         successor = []
-    
-        if y-1 > 0:
+
+        #Generates successors
+        if y-1 > 0: #If not top border
             A = Node(x,y-1)
             if (checkHeight(currentNode,A,m)):
                 successor.append(A)
 
-            if x + 1 < column: 
+            if x + 1 < column: #If not right border
                 A = Node(x+1,y-1)
                 if (checkHeight(currentNode,A,m)):
                     successor.append(A)
@@ -126,7 +135,7 @@ def A_Star(map:np.array,S:Node,G:Node, m:int):
                 if (checkHeight(currentNode,A,m)):
                     successor.append(A)
 
-            if x - 1 > 0: 
+            if x - 1 > 0: #If not left border
                 A = Node(x-1,y-1)
                 if (checkHeight(currentNode,A,m)):
                     successor.append(A)
@@ -135,22 +144,25 @@ def A_Star(map:np.array,S:Node,G:Node, m:int):
                 if (checkHeight(currentNode,A,m)):
                     successor.append(A)   
 
-        if y + 1 < row:
+        #If not bottom border
+        if y + 1 < row: 
             A = Node(x,y+1)
             if (checkHeight(currentNode,A,m)):
                 successor.append(A)
 
-            if x + 1 < column: 
+            if x + 1 < column:  #If not right border
                 A = Node(x+1,y+1)
                 if (checkHeight(currentNode,A,m)):
                     successor.append(A)
 
-            if x - 1 > 0:
+            if x - 1 > 0:   #If not left border
                 A = Node(x-1,y+1)
                 if (checkHeight(currentNode,A,m)):
                     successor.append(A)
         
+        #For each node in successros[]
         for node in successor:
+            #Calculate successors.f(n)
             successor_cost = currentNode.gn + d(currentNode,node,map)
             if node in queue:
                 if node.gn <= successor_cost: break
@@ -168,14 +180,15 @@ def A_Star(map:np.array,S:Node,G:Node, m:int):
 
                 queue.append(node)
                
-
+        #Add current_node to closed list
         closed_list.append(currentNode)
 
+        #Remove current node from open_list
         queue.remove(currentNode)
-
+        #Cái gì đây
         queue.sort(key = lambda Node: Node.gn)
 
-
+    #If the last node is not goal -->No solution or error
     if currentNode != G: return "Error"
                 
                 
@@ -193,6 +206,7 @@ print(map)
 A = Node(0,0)
 B = Node(2,3)
 m = 200
+print(H1_Mahattan(A,B))
 A_Star(map,A,B,m)
 
 
