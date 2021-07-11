@@ -207,7 +207,7 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
 
                     queue.append(node)
 
-                    node.visited = 0
+                    closed_list(node)
 
 
                 else:
@@ -220,9 +220,8 @@ def A_Star(map:np.array,S:Node,G:Node, m:int, heuristic,fileInput, fileOutput):
             node.parent = currentNode
                
         #Add current_node to closed list
-        #closed_list.append(currentNode)
+        closed_list.append(currentNode)
 
-        currentNode.visited = 1
         
 
         #Remove current node from open_list
