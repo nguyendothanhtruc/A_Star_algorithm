@@ -118,12 +118,10 @@ def H2_Euclid(A:Node, B:Node):
     return np.sqrt(np.square(A.x-B.x)+np.square(A.y-B.y))
 
 def H3_Complex(A:Node, B:Node):
-    dx1 = A.x - B.x
-    dy1 = A.y - B.y
-    dx2 = Start.x - B.x
-    dy2 = Start.y - B.y
-    cross = abs(dx1*dy2 - dx2*dy1)
-    return cross*0.001
+    dx = abs(A.x - B.x)
+    dy = abs(A.y - B.y)
+    dz = abs(map[A.y][A.x] - map[B.y][B.x])
+    return np.sqrt(2)*min(dx,dy) + max(dx,dy) + dz
 
 def generateSuccessor(currentNode:Node):
     #Current_node coordinates
@@ -199,12 +197,9 @@ def A_Star(heuristic):
     queue.append(Start)
     Start.fn = heuristic(Start,Goal)
 
-
     currentNode:Node
 
     #While open_list is not empty
-
-    dup=closed_list
     while (queue):
         currentNode = queue[0]
 
@@ -228,7 +223,6 @@ def A_Star(heuristic):
                     continue
 
             else: 
-               
                 #If node is in closed_list has g(n) <= successor_cost => Skip this node
                 #Otherwise, add this node back to queue
                 if closed_list[node.y][node.x] > 0:
@@ -239,7 +233,6 @@ def A_Star(heuristic):
 
                     closed_list[node.y][node.x]=0
  
-
                 #Update h(n) and add this node to queue
                 else:
                 	node.hn = heuristic(node,Goal) 
@@ -260,13 +253,8 @@ def A_Star(heuristic):
         #Sort queue according to f(n) value
         queue.sort(key = lambda Node: Node.fn)
 
-        #test
-        dup=closed_list
-
-
     #If the last node is not goal -->No solution or error
     if currentNode != Goal: writePath(None,closed_list)
-    print(dup)
 
 
 #---------MAIN--------:
@@ -280,6 +268,7 @@ map = convertToMatrix(imageInput)
 Start,Goal,m = readInput('input.txt')
 
 #function:
+
 
 imageOutput = 'map1.bmp'
 fileOutput = 'output1.txt'
