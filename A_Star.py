@@ -7,7 +7,7 @@ class Node:
     y : int= None
     gn : float = None
     fn : float = None
-    hn : int = None
+    hn : float = None
     parent = None
 
     def __init__(self,x,y):
@@ -63,7 +63,7 @@ def colorBMP(G:Node):
     while not G.isEqual(Start):
         img.putpixel((G.x,G.y),color)
         G = G.parent
-        print(str(G.x),str(G.y),sep = ',', end = '->')
+      
     img.putpixel((G.x,G.y),color)
 
     img.save(imageOutput)
@@ -86,7 +86,6 @@ def writePath(G:Node, closed_list):
 
         output.close()
 
-    
 
 #Calculate distance from A->B:
 def distance(A:Node,B:Node):
@@ -113,13 +112,18 @@ def isIn(list, G:Node):
 
 #Heuristic functions:
 def H1_Manhattan(A:Node, B:Node):
-    return abs(A.x-B.x)+abs(A.y-B.y) + abs(map[A.y][A.x] - map[B.y][B.x])#d(A,B,map)#
+    return abs(A.x-B.x)+abs(A.y-B.y) + abs(map[A.y][A.x] - map[B.y][B.x])
 
 def H2_Euclid(A:Node, B:Node):
     return np.sqrt(np.square(A.x-B.x)+np.square(A.y-B.y))
 
 def H3_Complex(A:Node, B:Node):
-    return A.x + B.x
+    dx1 = A.x - B.x
+    dy1 = A.y - B.y
+    dx2 = Start.x - B.x
+    dy2 = Start.y - B.y
+    cross = abs(dx1*dy2 - dx2*dy1)
+    return cross*0.001
 
 def generateSuccessor(currentNode:Node):
     #Current_node coordinates
@@ -187,7 +191,6 @@ def A_Star(heuristic):
     #Open list to store node have not been explored
     queue:list = [] 
 
-    return writePath(None,queue)
     #initialize matrix store g(n) value of each node
     row,col=map.shape
     closed_list=np.zeros((row,col))
@@ -284,9 +287,9 @@ A_Star(H1_Manhattan)
 
 imageOutput = 'map2.bmp'
 fileOutput = 'output2.txt'
-#A_Star(H2_Euclid)
+A_Star(H2_Euclid)
 
 imageOutput = 'map3.bmp'
 fileOutput = 'output3.txt'
-#A_Star(H3_Complex)
+A_Star(H3_Complex)
 
