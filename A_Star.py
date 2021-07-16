@@ -117,11 +117,14 @@ def H1_Manhattan(A:Node, B:Node):
 def H2_Euclid(A:Node, B:Node):
     return np.sqrt(np.square(A.x-B.x)+np.square(A.y-B.y))
 
-def H3_Complex(A:Node, B:Node):
-    dx = abs(A.x - B.x)
-    dy = abs(A.y - B.y)
+def H3_Octile_Distance(A:Node, B:Node):
     dz = abs(map[A.y][A.x] - map[B.y][B.x])
-    return np.sqrt(2)*min(dx,dy) + max(dx,dy) + dz
+    dx = A.x - B.x
+    dy = A.y - B.y
+    dx = Start.x - B.x
+    dy = Start.y - B.y
+    cross = abs(dx*dy - dx2*dy)
+    return np.sqrt(2)*min(abs(dx),abs(dy)) + max(abs(dx),abs(dy)) + dz + cross*0.001
 
 def generateSuccessor(currentNode:Node):
     #Current_node coordinates
@@ -272,13 +275,13 @@ Start,Goal,m = readInput('input.txt')
 
 imageOutput = 'map1.bmp'
 fileOutput = 'output1.txt'
-A_Star(H1_Manhattan)
+#A_Star(H1_Manhattan)
 
 imageOutput = 'map2.bmp'
 fileOutput = 'output2.txt'
-A_Star(H2_Euclid)
+#A_Star(H2_Euclid)
 
-imageOutput = 'map3.bmp'
-fileOutput = 'output3.txt'
-A_Star(H3_Complex)
+imageOutput = 'map5.bmp'
+fileOutput = 'output5.txt'
+A_Star(H3_Octile_Distance)
 
