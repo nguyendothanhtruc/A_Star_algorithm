@@ -13,9 +13,6 @@ class Node:
     def __init__(self,x,y):
         self.x = x
         self.y = y
-
-        self.visited = 0
-        
         self.fn = 0
         self.gn = 0
         self.hn = 0
@@ -121,6 +118,8 @@ def H1_Manhattan(A:Node, B:Node):
 def H2_Euclid(A:Node, B:Node):
     return np.sqrt(np.square(A.x-B.x)+np.square(A.y-B.y))
 
+def H3_Complex(A:Node, B:Node):
+    return A.x + B.x
 
 def generateSuccessor(currentNode:Node):
     #Current_node coordinates
@@ -287,6 +286,7 @@ imageOutput = 'map2.bmp'
 fileOutput = 'output2.txt'
 #A_Star(H2_Euclid)
 
-imageOutput = 'map2.bmp'
-fileOutput = 'output2.txt'
+imageOutput = 'map3.bmp'
+fileOutput = 'output3.txt'
+#A_Star(H3_Complex)
 
