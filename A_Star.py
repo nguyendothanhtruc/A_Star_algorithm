@@ -112,7 +112,7 @@ def isIn(list, G:Node):
 
 #Heuristic functions:
 def H1_Manhattan(A:Node, B:Node):
-    return abs(A.x-B.x)+abs(A.y-B.y) + abs(map[A.y][A.x] - map[B.y][B.x])
+    return abs(A.x-B.x)+abs(A.y-B.y) + abs(map[A.y][A.x] - map[B.y][B.x]) 
 
 def H2_Euclid(A:Node, B:Node):
     return np.sqrt(np.square(A.x-B.x)+np.square(A.y-B.y))
@@ -121,9 +121,9 @@ def H3_Octile_Distance(A:Node, B:Node):
     dz = abs(map[A.y][A.x] - map[B.y][B.x])
     dx = A.x - B.x
     dy = A.y - B.y
-    dx = Start.x - B.x
-    dy = Start.y - B.y
-    cross = abs(dx*dy - dx2*dy)
+    dx2 = Start.x - B.x
+    dy2 = Start.y - B.y
+    cross = abs(dx*dy2 - dx2*dy)
     return np.sqrt(2)*min(abs(dx),abs(dy)) + max(abs(dx),abs(dy)) + dz + cross*0.001
 
 def generateSuccessor(currentNode:Node):
@@ -258,6 +258,7 @@ def A_Star(heuristic):
 
     #If the last node is not goal -->No solution or error
     if currentNode != Goal: writePath(None,closed_list)
+    else: writePath(currentNode,closed_list)
 
 
 #---------MAIN--------:
@@ -272,16 +273,15 @@ Start,Goal,m = readInput('input.txt')
 
 #function:
 
-
 imageOutput = 'map1.bmp'
 fileOutput = 'output1.txt'
-#A_Star(H1_Manhattan)
+A_Star(H1_Manhattan)
 
 imageOutput = 'map2.bmp'
 fileOutput = 'output2.txt'
-#A_Star(H2_Euclid)
+A_Star(H2_Euclid)
 
-imageOutput = 'map5.bmp'
-fileOutput = 'output5.txt'
+imageOutput = 'map3.bmp'
+fileOutput = 'output3.txt'
 A_Star(H3_Octile_Distance)
 
